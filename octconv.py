@@ -30,19 +30,19 @@ class OctConv(nn.Module):
 
 
     def forward(self, x):
-        if self.alpha_in == 0: # First layer
+        if self.alpha_in == 0: # First layers
             h_in = x
             h2h = self.H2H(h_in)
             h2l = self.H2L(F.avg_pool2d(h_in,2))
             return h2h, h2l
 
-        elif self.alpha_out == 0: # Laster layer
+        elif self.alpha_out == 0: # Last layers
             h_in, l_in = x
             h2h = self.H2H(h_in)
             l2h = F.interpolate(self.L2H(l_in), scale_factor=2, mode='nearest')
             return h2h + l2h
              
-        else: # Middle layer
+        else: # Middle layers
             h_in, l_in = x
             h2h = self.H2H(h_in)
             h2l = self.H2L(F.avg_pool2d(h_in,2))
