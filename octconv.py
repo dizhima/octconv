@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class OctConv(nn.Module):
-    def __init__(self, nChannels, nOutChannels, stride=1, alphas=(0.5, 0.5)):
+    def __init__(self, nChannels, nOutChannels, kernel_size=3, stride=1, alphas=(0.5, 0.5)):
         super(OctConv, self).__init__()
         self.alpha_in, self.alpha_out = alphas
         assert 0 <= self.alpha_in <= 1, "Alphas must be in [0, 1]"
@@ -20,13 +20,13 @@ class OctConv(nn.Module):
         nOutCh_l = nOutChannels - nOutCh_h
 
         # filters
-        self.H2H     = nn.Conv2d(nCh_h, nOutCh_h, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.H2H     = nn.Conv2d(nCh_h, nOutCh_h, kernel_size, stride=stride, padding=kernel_size//2, bias=False)
         if nOutCh_l!=0:
-            self.H2L = nn.Conv2d(nCh_h, nOutCh_l, kernel_size=3, stride=stride, padding=1, bias=False)
+            self.H2L = nn.Conv2d(nCh_h, nOutCh_l, kernel_size, stride=stride, padding=kernel_size//2, bias=False)
         if nCh_l!=0 and nOutCh_l!=0: 
-            self.L2L = nn.Conv2d(nCh_l, nOutCh_l, kernel_size=3, stride=stride, padding=1, bias=False)
+            self.L2L = nn.Conv2d(nCh_l, nOutCh_l, kernel_size, stride=stride, padding=kernel_size//2, bias=False)
         if nCh_l!=0:
-            self.L2H = nn.Conv2d(nCh_l, nOutCh_h, kernel_size=3, stride=stride, padding=1, bias=False)
+            self.L2H = nn.Conv2d(nCh_l, nOutCh_h, kernel_size, stride=stride, padding=kernel_size//2, bias=False)
 
 
     def forward(self, x):
@@ -52,9 +52,9 @@ class OctConv(nn.Module):
 
 
 def main():
-    oct_in  = OctConv(3,8,1,(0  ,0.5))
-    oct_    = OctConv(8,8,2,(0.5,0.5))
-    oct_out = OctConv(8,1,1,(0.5,0  ))
+    oct_in  = OctConv(3,8,3,1,(0  ,0.5))
+    oct_    = OctConv(8,8,3,2,(0.5,0.5))
+    oct_out = OctConv(8,1,3,1,(0.5,0  ))
     
     net = nn.Sequential(oct_in,oct_,oct_out)
     dummy_x = torch.randn(2,3,32,32)
